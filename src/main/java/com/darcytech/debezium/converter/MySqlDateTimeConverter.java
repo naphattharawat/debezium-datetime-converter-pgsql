@@ -15,17 +15,17 @@ import java.util.function.Consumer;
  * Debezium默认将MySQL中datetime类型转成UTC的时间戳({@link io.debezium.time.Timestamp})，时区是写死的没法儿改，
  * 导致数据库中设置的UTC+8，到kafka中变成了多八个小时的long型时间戳
  * Debezium默认将MySQL中的timestamp类型转成UTC的字符串。
- * | mysql                               | mysql-binlog-connector                   | debezium                          |
- * | ----------------------------------- | ---------------------------------------- | --------------------------------- |
- * | date<br>(2021-01-28)                | LocalDate<br/>(2021-01-28)               | Integer<br/>(18655)               |
- * | time<br/>(17:29:04)                 | Duration<br/>(PT17H29M4S)                | Long<br/>(62944000000)            |
- * | timestamp<br/>(2021-01-28 17:29:04) | ZonedDateTime<br/>(2021-01-28T09:29:04Z) | String<br/>(2021-01-28T09:29:04Z) |
- * | Datetime<br/>(2021-01-28 17:29:04)  | LocalDateTime<br/>(2021-01-28T17:29:04)  | Long<br/>(1611854944000)          |
+ * | mysql                               | debezium                          |
+ * | ----------------------------------- | --------------------------------- |
+ * | date<br>(2021-01-28)                | Integer<br/>(18655)               |
+ * | time<br/>(17:29:04)                 | Long<br/>(62944000000)            |
+ * | timestamp<br/>(2021-01-28 17:29:04) | Long<br/>(1611854944000)          |
+ * | Datetime<br/>(2021-01-28 17:29:04)  | Long<br/>(1611854944000)          |
  *
  * @see io.debezium.connector.mysql.converters.TinyIntOneToBooleanConverter
  */
 @Slf4j
-public class MySqlDateTimeConverter implements CustomConverter<SchemaBuilder, RelationalColumn> {
+public class PgSqlDateTimeConverter implements CustomConverter<SchemaBuilder, RelationalColumn> {
 
     private DateTimeFormatter dateFormatter = DateTimeFormatter.ISO_DATE;
     private DateTimeFormatter timeFormatter = DateTimeFormatter.ISO_TIME;
@@ -113,13 +113,11 @@ public class MySqlDateTimeConverter implements CustomConverter<SchemaBuilder, Re
     }
 
     private String convertTimestamp(Object input) {
-        if (input instanceof ZonedDateTime) {
-            // mysql的timestamp会转成UTC存储，这里的zonedDatetime都是UTC时间
-            ZonedDateTime zonedDateTime = (ZonedDateTime) input;
-            LocalDateTime localDateTime = zonedDateTime.withZoneSameInstant(timestampZoneId).toLocalDateTime();
-            return timestampFormatter.format(localDateTime);
+          if (input instanceof LocalDateTime) {
+            return datetimeFormatter.format((LocalDateTime) input);
         }
         return null;
+        
     }
 
 }
