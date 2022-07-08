@@ -39,3 +39,10 @@ datetime.format.datetime=yyyy-MM-dd HH:mm:ss
 datetime.format.timestamp=yyyy-MM-dd HH:mm:ss
 datetime.format.timestamp.zone=UTC+8
 ```
+
+
+## Build
+
+```
+mvn -B package --file pom.xml
+```
